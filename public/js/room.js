@@ -54,7 +54,26 @@ const el = {
   reactionFloatLayer: document.getElementById('reaction-float-layer'),
   btnJoinVoice: document.getElementById('btn-join-voice'),
   voiceAudioContainer: document.getElementById('voice-audio-container'),
+  btnToggleChatMobile: document.getElementById('btn-toggle-chat-mobile'),
+  btnCloseChatMobile: document.getElementById('btn-close-chat-mobile'),
+  chatBackdrop: document.getElementById('chat-backdrop'),
+  chatArea: document.getElementById('chat-area'),
 };
+
+// ---------- Mobile chat bottom-sheet (gaya Rave: chat disembunyikan, muncul saat di-tap) ----------
+function openMobileChat() {
+  document.body.classList.add('chat-sheet-open');
+}
+function closeMobileChat() {
+  document.body.classList.remove('chat-sheet-open');
+}
+if (el.btnToggleChatMobile) el.btnToggleChatMobile.addEventListener('click', openMobileChat);
+if (el.btnCloseChatMobile) el.btnCloseChatMobile.addEventListener('click', closeMobileChat);
+if (el.chatBackdrop) el.chatBackdrop.addEventListener('click', closeMobileChat);
+// Kirim pesan otomatis nutup sheet-nya biar user langsung lihat video lagi (opsional, terasa lebih natural)
+if (el.chatInput) {
+  el.chatInput.addEventListener('focus', () => { if (window.innerWidth <= 600) openMobileChat(); });
+}
 
 if (mode !== 'create' && !roomId && !inviteTokenFromUrl) {
   alert('Kode room / link tidak valid.');
