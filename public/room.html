@@ -105,7 +105,12 @@
       </div>
 
       <!-- CHAT AREA -->
-      <div class="chat-area">
+      <div class="chat-area" id="chat-area">
+        <div class="chat-sheet-handle" id="chat-sheet-handle">
+          <span class="chat-sheet-grip"></span>
+          <span class="chat-sheet-title">💬 Chat</span>
+          <button type="button" id="btn-close-chat-mobile" class="chat-sheet-close">✕</button>
+        </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-attach-preview" id="chat-attach-preview" style="display:none;">
           <span id="chat-attach-name"></span>
@@ -119,6 +124,10 @@
         </form>
       </div>
     </div>
+    <div class="chat-backdrop" id="chat-backdrop"></div>
+    <button type="button" id="btn-toggle-chat-mobile" class="mobile-chat-bar">
+      💬 <span>Buka Chat</span>
+    </button>
   </div>
 
   <!-- MODAL PILIH SUMBER VIDEO -->
