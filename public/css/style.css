@@ -245,60 +245,112 @@ button, .primary-btn, .secondary-btn, .tab-btn, .source-tab-btn {
 }
 
 /* ============================================================
-   MOBILE (HP) — layar sempit, dioptimalkan untuk sentuhan
+   MOBILE (HP) — gaya "Rave": video full-bleed, kontrol melayang,
+   chat disembunyikan jadi bottom-sheet yang muncul saat di-tap
    ============================================================ */
+.chat-backdrop, .mobile-chat-bar, .chat-sheet-handle { display: none; }
+
 @media (max-width: 600px) {
   html, body { overflow-x: hidden; }
-  .room-wrapper { height: 100vh; height: 100dvh; }
+  .room-wrapper { height: 100vh; height: 100dvh; position: relative; overflow: hidden; }
 
-  /* Header: logo + kode room jadi ringkas, daftar user disembunyikan biar gak sempit */
+  /* Header: ramping, cuma info penting */
   .room-header {
-    padding: 8px 10px;
-    flex-wrap: wrap;
+    padding: 6px 10px;
+    flex-wrap: nowrap;
     gap: 6px;
+    position: relative;
+    z-index: 15;
   }
-  .room-info h2 { font-size: 14px; }
-  .app-logo-room { height: 26px; }
-  .room-code-box { font-size: 11.5px; flex-wrap: wrap; gap: 5px; }
-  .room-code-box button { padding: 5px 8px; font-size: 11px; }
-  .user-list { display: none; } /* daftar user dipindah ke chat sebagai info, biar header gak penuh */
+  .room-info h2 { font-size: 13px; }
+  .app-logo-room { height: 22px; }
+  .room-code-box { font-size: 10.5px; gap: 4px; }
+  .room-code-box button { padding: 4px 7px; font-size: 10px; }
+  .user-list { display: none; }
 
-  /* Video area: video tetap 16:9 di atas, sisanya scroll */
-  .room-body { flex-direction: column; overflow-y: auto; }
-  .player-container { aspect-ratio: 16 / 9; max-height: 45vh; flex: none; }
-  .video-area { flex: none; }
+  /* VIDEO FULL-BLEED: ambil hampir seluruh sisa layar, bukan cuma 16:9 kecil */
+  .room-body { flex-direction: column; overflow: hidden; position: relative; height: 100%; }
+  .video-area { flex: 1; display: flex; position: relative; min-height: 0; }
+  .player-container {
+    aspect-ratio: unset; max-height: none; flex: 1; width: 100%; margin: 0;
+  }
 
-  /* Kontrol player: perbesar tombol biar gampang dipencet jari */
-  .player-overlay { padding: 4px 8px 8px; }
-  .pc-btn { width: 40px; height: 40px; font-size: 20px; }
-  .pc-time { font-size: 11px; }
-  .pc-volume { display: none; } /* volume device sudah cukup di HP, hemat ruang */
-  .seek-bar::-webkit-slider-thumb { width: 16px; height: 16px; margin-top: -6px; }
-  .settings-menu { width: 200px; right: -8px; }
+  /* Kontrol playback (play/pause/seek) tetap overlay di video, tapi lebih ramping */
+  .player-overlay { padding: 4px 8px 6px; }
+  .pc-btn { width: 38px; height: 38px; font-size: 19px; }
+  .pc-time { font-size: 10.5px; }
+  .pc-volume { display: none; }
+  .seek-bar::-webkit-slider-thumb { width: 15px; height: 15px; margin-top: -5.5px; }
+  .settings-menu { width: 190px; right: -4px; bottom: 46px; }
 
-  /* Bar tombol bawah video: tombol full-width, ditumpuk rapi, target sentuh besar */
+  /* Bar mic/reaksi/ganti-sumber jadi PIL MELAYANG di atas video (bukan strip di bawah video) */
   .video-controls-bar {
-    padding: 8px 10px;
-    gap: 8px;
+    position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%);
+    z-index: 12; width: auto; max-width: calc(100% - 20px);
+    background: rgba(15,15,26,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 30px;
+    padding: 6px 8px; gap: 6px; flex-wrap: nowrap; overflow-x: auto;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
   }
-  .video-controls-bar button,
-  #btn-join-voice,
-  #btn-change-source {
-    padding: 10px 12px;
-    font-size: 13px;
-    flex: 1 1 auto;
-    min-height: 40px;
+  .video-controls-bar::-webkit-scrollbar { display: none; }
+  .video-controls-bar button, #btn-join-voice, #btn-change-source {
+    padding: 8px 12px; font-size: 12px; flex: 0 0 auto; min-height: 34px; white-space: nowrap;
+    border-radius: 20px;
   }
-  .master-badge, .viewer-note { flex-basis: 100%; text-align: center; font-size: 11px; }
-  .reaction-bar { flex-basis: 100%; justify-content: center; margin-left: 0; }
-  .reaction-bar button { min-height: 38px; min-width: 38px; font-size: 18px; }
+  .master-badge, .viewer-note { display: none; } /* info ini dipindah jadi toast singkat, gak makan tempat permanen */
+  .reaction-bar { flex-basis: auto; margin-left: 0; gap: 3px; }
+  .reaction-bar button { min-height: 32px; min-width: 32px; font-size: 15px; padding: 4px 6px; }
 
-  .queue-bar { padding: 6px 10px; }
-  .queue-chip { font-size: 11px; }
+  .queue-bar {
+    position: absolute; left: 0; right: 0; bottom: 114px; z-index: 11;
+    background: rgba(15,15,26,0.7); backdrop-filter: blur(8px); border: none;
+    padding: 5px 10px;
+  }
+  .queue-chip { font-size: 10.5px; }
 
-  /* Chat: ambil sisa layar, input gak bikin zoom otomatis di iOS (font-size >= 16px) */
-  .chat-area { flex: 1; height: auto; min-height: 180px; }
-  .chat-messages { padding: 8px; gap: 6px; }
+  /* ---------- BOTTOM SHEET CHAT (gaya Rave: default tersembunyi) ---------- */
+  .mobile-chat-bar {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 13;
+    background: rgba(124,92,255,0.85); backdrop-filter: blur(8px);
+    color: #fff; border: none; border-radius: 24px; padding: 11px; font-size: 13px; font-weight: 600;
+    box-shadow: 0 6px 18px rgba(124,92,255,0.35); cursor: pointer;
+  }
+
+  .chat-area {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    height: 0; max-height: 78dvh;
+    background: rgba(18,18,30,0.98); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 20px 20px 0 0; border-top: 1px solid #2b2b45;
+    overflow: hidden; transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(.2,.8,.3,1);
+    display: flex; flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .chat-sheet-handle {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px 8px; flex-shrink: 0; position: relative;
+  }
+  .chat-sheet-grip {
+    position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+    width: 36px; height: 4px; border-radius: 3px; background: #3a3a55;
+  }
+  .chat-sheet-title { font-size: 13px; font-weight: 700; color: #ddd; margin-top: 6px; }
+  .chat-sheet-close {
+    background: rgba(255,255,255,0.08); border: none; color: #ddd; border-radius: 50%;
+    width: 26px; height: 26px; font-size: 13px; cursor: pointer; margin-top: 4px;
+  }
+  .chat-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 35;
+    background: rgba(0,0,0,0); pointer-events: none;
+    transition: background 0.28s ease;
+  }
+
+  body.chat-sheet-open .chat-area { transform: translateY(0); height: 78dvh; }
+  body.chat-sheet-open .chat-backdrop { background: rgba(0,0,0,0.5); pointer-events: auto; }
+  body.chat-sheet-open .mobile-chat-bar { display: none; }
+
+  .chat-messages { padding: 8px 12px; gap: 6px; }
   .chat-msg { font-size: 13px; }
   .chat-form input[type="text"] { font-size: 16px; padding: 12px 10px; }
   .chat-form button[type="submit"] { padding: 0 14px; font-size: 13px; }
@@ -316,10 +368,7 @@ button, .primary-btn, .secondary-btn, .tab-btn, .source-tab-btn {
   .yt-result-card img { width: 120px; flex-shrink: 0; aspect-ratio: 16/9; }
   .yt-result-card .yt-result-info { padding: 6px 8px; flex: 1; }
 
-  /* Double-tap seek zone tetap ada tapi kasih jarak dari overlay biar gak ganggu drag seekbar */
-  .double-tap-zone { bottom: 64px; }
-
-  /* Master toast & seek flash sedikit lebih kecil biar gak nutupin video kecil */
+  .double-tap-zone { bottom: 0; }
   .master-toast { font-size: 11px; padding: 6px 12px; top: 8px; }
   .seek-flash { padding: 10px 14px; font-size: 12px; }
 }
