@@ -244,6 +244,86 @@ button, .primary-btn, .secondary-btn, .tab-btn, .source-tab-btn {
   .chat-area { max-width: 100%; height: 260px; border-left: none; border-top: 1px solid #262640; }
 }
 
+/* ============================================================
+   MOBILE (HP) — layar sempit, dioptimalkan untuk sentuhan
+   ============================================================ */
+@media (max-width: 600px) {
+  html, body { overflow-x: hidden; }
+  .room-wrapper { height: 100vh; height: 100dvh; }
+
+  /* Header: logo + kode room jadi ringkas, daftar user disembunyikan biar gak sempit */
+  .room-header {
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .room-info h2 { font-size: 14px; }
+  .app-logo-room { height: 26px; }
+  .room-code-box { font-size: 11.5px; flex-wrap: wrap; gap: 5px; }
+  .room-code-box button { padding: 5px 8px; font-size: 11px; }
+  .user-list { display: none; } /* daftar user dipindah ke chat sebagai info, biar header gak penuh */
+
+  /* Video area: video tetap 16:9 di atas, sisanya scroll */
+  .room-body { flex-direction: column; overflow-y: auto; }
+  .player-container { aspect-ratio: 16 / 9; max-height: 45vh; flex: none; }
+  .video-area { flex: none; }
+
+  /* Kontrol player: perbesar tombol biar gampang dipencet jari */
+  .player-overlay { padding: 4px 8px 8px; }
+  .pc-btn { width: 40px; height: 40px; font-size: 20px; }
+  .pc-time { font-size: 11px; }
+  .pc-volume { display: none; } /* volume device sudah cukup di HP, hemat ruang */
+  .seek-bar::-webkit-slider-thumb { width: 16px; height: 16px; margin-top: -6px; }
+  .settings-menu { width: 200px; right: -8px; }
+
+  /* Bar tombol bawah video: tombol full-width, ditumpuk rapi, target sentuh besar */
+  .video-controls-bar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .video-controls-bar button,
+  #btn-join-voice,
+  #btn-change-source {
+    padding: 10px 12px;
+    font-size: 13px;
+    flex: 1 1 auto;
+    min-height: 40px;
+  }
+  .master-badge, .viewer-note { flex-basis: 100%; text-align: center; font-size: 11px; }
+  .reaction-bar { flex-basis: 100%; justify-content: center; margin-left: 0; }
+  .reaction-bar button { min-height: 38px; min-width: 38px; font-size: 18px; }
+
+  .queue-bar { padding: 6px 10px; }
+  .queue-chip { font-size: 11px; }
+
+  /* Chat: ambil sisa layar, input gak bikin zoom otomatis di iOS (font-size >= 16px) */
+  .chat-area { flex: 1; height: auto; min-height: 180px; }
+  .chat-messages { padding: 8px; gap: 6px; }
+  .chat-msg { font-size: 13px; }
+  .chat-form input[type="text"] { font-size: 16px; padding: 12px 10px; }
+  .chat-form button[type="submit"] { padding: 0 14px; font-size: 13px; }
+  #btn-attach-media { padding: 0 8px; font-size: 20px; }
+
+  /* Modal pilih sumber video: full-screen biar nyaman di layar kecil */
+  .modal-box {
+    width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh;
+    border-radius: 0; padding: 14px; padding-bottom: max(14px, env(safe-area-inset-bottom));
+  }
+  .source-tabs { gap: 5px; }
+  .source-tab-btn { font-size: 11.5px; padding: 8px 10px; flex: 1 1 40%; text-align: center; }
+  .youtube-results-grid { grid-template-columns: 1fr; max-height: none; }
+  .yt-result-card { display: flex; }
+  .yt-result-card img { width: 120px; flex-shrink: 0; aspect-ratio: 16/9; }
+  .yt-result-card .yt-result-info { padding: 6px 8px; flex: 1; }
+
+  /* Double-tap seek zone tetap ada tapi kasih jarak dari overlay biar gak ganggu drag seekbar */
+  .double-tap-zone { bottom: 64px; }
+
+  /* Master toast & seek flash sedikit lebih kecil biar gak nutupin video kecil */
+  .master-toast { font-size: 11px; padding: 6px 12px; top: 8px; }
+  .seek-flash { padding: 10px 14px; font-size: 12px; }
+}
+
 /* ---------- LOGO ---------- */
 .app-logo { display: block; object-fit: contain; }
 .app-logo-landing { height: 88px; margin: 0 auto 14px; }
