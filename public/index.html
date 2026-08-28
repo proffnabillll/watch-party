@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PROFFNABILL WATCH PARTY</title>
+  <link rel="icon" type="image/png" href="/assets/icon.png" onerror="this.remove()" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="landing-wrapper">
+    <div class="landing-card">
+      <img src="/assets/logo.png" alt="Logo" class="app-logo app-logo-landing" onerror="this.style.display='none'" />
+      <h1 class="brand">🎬 PROFFNABILL <span>WATCH PARTY</span></h1>
+      <p class="tagline">Nonton bareng dari YouTube, Google Drive, website lain, atau file kamu sendiri — sambil chat real-time.</p>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="create">Buat Room</button>
+        <button class="tab-btn" data-tab="join">Gabung Room</button>
+      </div>
+
+      <div id="create-panel" class="tab-panel active">
+        <label>Nama kamu</label>
+        <input type="text" id="create-name" placeholder="Masukkan nama kamu" />
+        <label>Nama Room (opsional)</label>
+        <input type="text" id="create-roomname" placeholder="Contoh: Nobar Film Malam Minggu" />
+        <button class="primary-btn" id="btn-create-room">Buat Room & Jadi Room Master</button>
+      </div>
+
+      <div id="join-panel" class="tab-panel">
+        <label>Nama kamu</label>
+        <input type="text" id="join-name" placeholder="Masukkan nama kamu" />
+        <label>Kode Room</label>
+        <input type="text" id="join-roomid" placeholder="Contoh: AB12CD" maxlength="6" style="text-transform:uppercase" />
+        <button class="primary-btn" id="btn-join-room">Gabung Room</button>
+      </div>
+
+      <p class="error-msg" id="error-msg"></p>
+    </div>
+  </div>
+
+  <script src="/js/security.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/landing.js"></script>
+</body>
+</html>

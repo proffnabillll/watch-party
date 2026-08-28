@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Room - PROFFNABILL WATCH PARTY</title>
+  <link rel="icon" type="image/png" href="/assets/icon.png" onerror="this.remove()" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="room-wrapper">
+    <!-- HEADER -->
+    <header class="room-header">
+      <div class="room-info">
+        <div class="room-title-row">
+          <img src="/assets/logo.png" alt="Logo" class="app-logo app-logo-room" onerror="this.style.display='none'" />
+          <h2 id="room-name">Room</h2>
+        </div>
+        <div class="room-code-box">
+          Kode Room: <span id="room-code-text">-</span>
+          <button id="btn-copy-code" title="Salin kode">📋</button>
+          <button id="btn-copy-link" title="Salin link undangan">🔗 Salin Link</button>
+        </div>
+      </div>
+      <div class="user-list" id="user-list"></div>
+    </header>
+
+    <div class="room-body">
+      <!-- VIDEO AREA -->
+      <div class="video-area">
+        <div id="player-container" class="player-container">
+          <div id="no-video-placeholder" class="no-video-placeholder">
+            <p>Belum ada video dipilih.</p>
+            <button id="btn-open-source-modal" class="primary-btn master-only" style="display:none;">Pilih Sumber Video</button>
+          </div>
+          <div id="youtube-player"></div>
+          <video id="html5-player" controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture style="display:none; width:100%; height:100%; background:#000;"></video>
+          <div id="viewer-block-overlay" class="viewer-block-overlay" style="display:none;"></div>
+          <div id="fullscreen-chat-marquee" class="fullscreen-marquee">
+            <div id="marquee-track" class="marquee-track"></div>
+          </div>
+          <div id="reaction-float-layer" class="reaction-float-layer"></div>
+
+          <!-- ZONA DOUBLE TAP: kanan = maju 10 detik, kiri = mundur 10 detik (khusus Room Master) -->
+          <div class="double-tap-zone dt-left" id="dt-left"></div>
+          <div class="double-tap-zone dt-right" id="dt-right"></div>
+          <div class="seek-flash seek-flash-left" id="seek-flash-left">⏪ <span>10 dtk</span></div>
+          <div class="seek-flash seek-flash-right" id="seek-flash-right"><span>10 dtk</span> ⏩</div>
+          <div class="master-toast" id="master-toast"></div>
+
+          <!-- CUSTOM PLAYER CONTROLS -->
+          <div class="player-overlay" id="player-overlay">
+            <div class="seek-row">
+              <input type="range" id="seek-bar" class="seek-bar" min="0" max="1000" value="0" step="0.1" />
+            </div>
+            <div class="player-controls">
+              <div class="pc-group pc-left">
+                <button type="button" id="btn-playpause" class="pc-btn master-only-ctrl" title="Play/Pause (Spasi)">▶️</button>
+                <span id="pc-time" class="pc-time">0:00 / 0:00</span>
+              </div>
+              <div class="pc-group pc-right">
+                <div class="pc-volume">
+                  <button type="button" id="btn-mute" class="pc-btn" title="Bisukan">🔊</button>
+                  <input type="range" id="volume-bar" class="volume-bar" min="0" max="100" value="100" />
+                </div>
+                <div class="pc-settings">
+                  <button type="button" id="btn-settings" class="pc-btn" title="Pengaturan">⚙️</button>
+                  <div class="settings-menu" id="settings-menu" style="display:none;">
+                    <div class="settings-section">
+                      <div class="settings-section-title">💬 Subtitle / Terjemahan</div>
+                      <div class="settings-option-list" id="settings-subtitle-list">
+                        <div class="settings-option-empty">Tidak ada video aktif</div>
+                      </div>
+                    </div>
+                    <div class="settings-section">
+                      <div class="settings-section-title">🎞️ Kualitas Video</div>
+                      <div class="settings-option-list" id="settings-quality-list">
+                        <div class="settings-option-empty">Tidak ada video aktif</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" id="btn-fullscreen" class="pc-btn" title="Fullscreen (biar chat tetap kelihatan sebagai running text)">⛶</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="video-controls-bar">
+          <button id="btn-change-source" class="secondary-btn master-only" style="display:none;">🔄 Ganti Sumber Video</button>
+          <button id="btn-join-voice" class="secondary-btn" title="Aktifkan mikrofon untuk voice chat">🎤 Aktifkan Mikrofon</button>
+          <span id="master-badge" class="master-badge" style="display:none;">👑 Kamu adalah Room Master</span>
+          <span id="viewer-note" class="viewer-note">Playback dikendalikan oleh Room Master</span>
+          <div class="reaction-bar" id="reaction-bar">
+            <button type="button" data-emoji="👍">👍</button>
+            <button type="button" data-emoji="❤️">❤️</button>
+            <button type="button" data-emoji="😂">😂</button>
+            <button type="button" data-emoji="😮">😮</button>
+            <button type="button" data-emoji="🔥">🔥</button>
+          </div>
+        </div>
+        <div class="queue-bar" id="queue-bar" style="display:none;">
+          <span class="queue-label">📋 Antrian:</span>
+          <div class="queue-items" id="queue-items"></div>
+        </div>
+      </div>
+
+      <!-- CHAT AREA -->
+      <div class="chat-area">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-attach-preview" id="chat-attach-preview" style="display:none;">
+          <span id="chat-attach-name"></span>
+          <button type="button" id="btn-cancel-attach">✕</button>
+        </div>
+        <form id="chat-form" class="chat-form">
+          <button type="button" id="btn-attach-media" title="Kirim foto/video">📎</button>
+          <input type="file" id="chat-media-input" accept="image/*,video/*" style="display:none;" />
+          <input type="text" id="chat-input" placeholder="Ketik pesan..." autocomplete="off" />
+          <button type="submit">Kirim</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PILIH SUMBER VIDEO -->
+  <div id="source-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Pilih Sumber Video</h3>
+        <button id="btn-close-modal" class="close-btn">✕</button>
+      </div>
+
+      <div class="source-tabs">
+        <button class="source-tab-btn active" data-source="youtube">▶️ YouTube</button>
+        <button class="source-tab-btn" data-source="drive">🗂️ Google Drive</button>
+        <button class="source-tab-btn" data-source="website">🌐 Website Lain</button>
+        <button class="source-tab-btn" data-source="file">💻 File Perangkat</button>
+      </div>
+
+      <!-- YOUTUBE -->
+      <div class="source-panel active" data-panel="youtube">
+        <form id="youtube-search-form" class="youtube-search-bar">
+          <input type="text" id="youtube-search-input" placeholder="Cari video di YouTube..." />
+          <button type="submit">🔍 Cari</button>
+        </form>
+        <p class="hint small" id="youtube-status"></p>
+        <div class="youtube-results-grid" id="youtube-results-grid"></div>
+      </div>
+
+      <!-- GOOGLE DRIVE -->
+      <div class="source-panel" data-panel="drive">
+        <p class="hint">Login ke Google Drive kamu, lalu pilih video yang ingin ditonton bersama. Pastikan file di-share minimal "Anyone with the link can view" agar peserta lain juga bisa menontonnya.</p>
+        <button class="primary-btn" id="btn-drive-login">🔐 Login & Pilih dari Google Drive</button>
+        <p class="hint" style="margin-top:12px;">Atau masukkan link video Google Drive secara manual:</p>
+        <input type="text" id="drive-url-input" placeholder="https://drive.google.com/file/d/FILE_ID/view" />
+        <button class="secondary-btn" id="btn-load-drive-manual">Muat dari Link Manual</button>
+        <p class="hint small" id="drive-config-warning">⚠️ Fitur login Google Drive perlu diaktifkan oleh admin (isi Client ID & API Key di js/drive-config.js). Lihat README.</p>
+      </div>
+
+      <!-- WEBSITE LAIN -->
+      <div class="source-panel" data-panel="website">
+        <p class="hint">Tempel link halaman video dari website lain. Sistem akan mencoba mendeteksi otomatis sumber videonya.</p>
+        <input type="text" id="website-url-input" placeholder="https://contoh-situs.com/video/123" />
+        <button class="primary-btn" id="btn-detect-website">🔍 Deteksi Video</button>
+        <p class="hint small" id="website-detect-status"></p>
+      </div>
+
+      <!-- FILE PERANGKAT -->
+      <div class="source-panel" data-panel="file">
+        <p class="hint">Upload file video dari perangkat kamu. File akan diupload ke server agar semua peserta bisa menontonnya bersama.</p>
+        <input type="file" id="file-input" accept="video/*" />
+        <p class="hint" style="margin-top:10px;">Subtitle terpisah (opsional — kalau video tidak punya subtitle tertanam, atau ekstraksi otomatis gagal):</p>
+        <input type="file" id="subtitle-file-input" accept=".srt,.vtt,.ass,.ssa" />
+        <div class="progress-bar-wrapper" id="upload-progress-wrapper" style="display:none;">
+          <div class="progress-bar" id="upload-progress-bar"></div>
+        </div>
+        <button class="primary-btn" id="btn-upload-file">⬆️ Upload & Putar</button>
+        <p class="hint small" id="ffmpeg-status-hint" style="display:none;"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/security.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="/js/drive-config.js"></script>
+  <div id="voice-audio-container" style="display:none;"></div>
+  <script src="/js/room.js"></script>
+</body>
+</html>
