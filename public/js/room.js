@@ -1177,7 +1177,18 @@ socket.on('reaction', ({ emoji }) => {
 let voiceJoined = false;
 let localAudioStream = null;
 const peerConnections = {}; // socketId -> RTCPeerConnection
-const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+// STUN saja sering gagal kalau kedua peserta beda jaringan (mis. HP data seluler vs WiFi),
+// karena banyak jaringan mobile/CGNAT di Indonesia pakai NAT simetris yang butuh relay TURN.
+// TURN server publik gratis (openrelay.metered.ca) ditambahkan sebagai fallback.
+const rtcConfig = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+  ]
+};
 
 el.btnJoinVoice.addEventListener('click', async () => {
   if (voiceJoined) {
@@ -1232,15 +1243,32 @@ function createPeerConnection(remoteSocketId) {
       socket.emit('voice-signal', { targetSocketId: remoteSocketId, data: { type: 'ice-candidate', candidate: e.candidate } });
     }
   };
+  // Debug bantuan: kalau koneksi voice chat gagal, ini akan kelihatan di console browser (F12)
+  pc.oniceconnectionstatechange = () => {
+    console.log(`[voice] ICE state dengan ${remoteSocketId}:`, pc.iceConnectionState);
+    if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+      console.warn(`[voice] Koneksi ke ${remoteSocketId} gagal/putus. Coba matikan lalu nyalakan lagi mikrofon.`);
+    }
+  };
   pc.ontrack = (e) => {
     let audioEl = document.getElementById(`voice-audio-${remoteSocketId}`);
     if (!audioEl) {
       audioEl = document.createElement('audio');
       audioEl.id = `voice-audio-${remoteSocketId}`;
       audioEl.autoplay = true;
+      audioEl.playsInline = true;
       el.voiceAudioContainer.appendChild(audioEl);
     }
     audioEl.srcObject = e.streams[0];
+    // Beberapa browser mobile memblokir autoplay audio; coba paksa play() dan beri fallback.
+    const playPromise = audioEl.play();
+    if (playPromise && playPromise.catch) {
+      playPromise.catch(() => {
+        console.warn('[voice] Autoplay audio diblokir browser, menunggu interaksi pengguna berikutnya.');
+        const resumeAudio = () => { audioEl.play().catch(() => {}); document.removeEventListener('click', resumeAudio); };
+        document.addEventListener('click', resumeAudio, { once: true });
+      });
+    }
   };
   peerConnections[remoteSocketId] = pc;
   return pc;
