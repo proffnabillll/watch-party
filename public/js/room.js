@@ -1,5 +1,59 @@
 const socket = io();
 
+// ---------- Ikon SVG (pengganti emoji dasar biar tampilan lebih rapi & konsisten) ----------
+const ICONS = {
+  play: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
+  volumeHigh: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 9 3 15 8 15 13 20 13 4 8 9 3 9" fill="currentColor" stroke="none"/><path d="M16 8a5 5 0 0 1 0 8"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+  volumeLow: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 9 3 15 8 15 13 20 13 4 8 9 3 9" fill="currentColor" stroke="none"/><path d="M16 8a5 5 0 0 1 0 8"/></svg>',
+  volumeMute: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 9 3 15 8 15 13 20 13 4 8 9 3 9" fill="currentColor" stroke="none"/><line x1="16" y1="9" x2="22" y2="15"/><line x1="22" y1="9" x2="16" y2="15"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15 1.65 1.65 0 0 0 3.17 14H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.32.4.6.73.73.24.1.5.16.77.16H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  fullscreenEnter: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>',
+  fullscreenExit: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>',
+  mic: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>',
+  micOff: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2"/><path d="M19 10v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  link: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
+  attach: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>',
+  send: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  close: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+};
+// Terapkan ikon SVG ke tombol-tombol statis (yang gak toggle) begitu halaman siap
+document.addEventListener('DOMContentLoaded', () => {
+  const map = {
+    'btn-copy-code': ICONS.copy,
+    'btn-settings': ICONS.settings,
+    'btn-attach-media': ICONS.attach,
+    'btn-close-chat-mobile': ICONS.close,
+    'btn-cancel-attach': ICONS.close,
+    'btn-close-modal': ICONS.close,
+  };
+  Object.entries(map).forEach(([id, svg]) => {
+    const node = document.getElementById(id);
+    if (node) node.innerHTML = svg + (node.dataset.label ? ` <span>${node.dataset.label}</span>` : '');
+  });
+  const copyLinkBtn = document.getElementById('btn-copy-link');
+  if (copyLinkBtn) copyLinkBtn.innerHTML = `${ICONS.link} Salin Link`;
+  const changeSourceBtn = document.getElementById('btn-change-source');
+  if (changeSourceBtn) changeSourceBtn.innerHTML = `${ICONS.refresh} Ganti Sumber Video`;
+  const sendBtn = document.querySelector('#chat-form button[type="submit"]');
+  if (sendBtn) sendBtn.innerHTML = `${ICONS.send} Kirim`;
+  const mobileChatBar = document.getElementById('btn-toggle-chat-mobile');
+  if (mobileChatBar) mobileChatBar.innerHTML = `${ICONS.chat} <span>Buka Chat</span>`;
+  const chatSheetTitle = document.getElementById('chat-sheet-title-text');
+  if (chatSheetTitle) chatSheetTitle.innerHTML = `${ICONS.chat} Chat`;
+  const playBtn = document.getElementById('btn-playpause');
+  if (playBtn) playBtn.innerHTML = ICONS.play;
+  const muteBtn = document.getElementById('btn-mute');
+  if (muteBtn) muteBtn.innerHTML = ICONS.volumeHigh;
+  const fsBtn = document.getElementById('btn-fullscreen');
+  if (fsBtn) fsBtn.innerHTML = ICONS.fullscreenEnter;
+  const micBtn = document.getElementById('btn-join-voice');
+  if (micBtn && !micBtn.classList.contains('mic-active')) micBtn.innerHTML = `${ICONS.mic} <span>Aktifkan Mikrofon</span>`;
+});
+
 const urlParams = new URLSearchParams(window.location.search);
 const mode = urlParams.get('mode'); // 'create' | 'join' | null
 let roomId = (urlParams.get('room') || '').toUpperCase();
@@ -49,8 +103,8 @@ const el = {
   queueBar: document.getElementById('queue-bar'),
   queueItems: document.getElementById('queue-items'),
   btnFullscreen: document.getElementById('btn-fullscreen'),
-  fullscreenMarquee: document.getElementById('fullscreen-chat-marquee'),
-  marqueeTrack: document.getElementById('marquee-track'),
+  chatBubbleLayer: document.getElementById('chat-bubble-layer'),
+  btnCenterPlay: document.getElementById('btn-center-play'),
   reactionFloatLayer: document.getElementById('reaction-float-layer'),
   btnJoinVoice: document.getElementById('btn-join-voice'),
   voiceAudioContainer: document.getElementById('voice-audio-container'),
@@ -328,9 +382,9 @@ socket.on('chat-message', ({ name, message, isMaster: senderIsMaster, attachment
   el.chatMessages.appendChild(div);
   el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
 
-  // Tampilkan juga sebagai running text saat lagi fullscreen, biar tetap tahu ada yang chat
+  // Tampilkan juga sebagai bubble notifikasi pojok layar saat lagi fullscreen
   const preview = message || (attachment ? (attachment.type === 'image' ? '[Foto]' : '[Video]') : '');
-  pushMarquee(`💬 ${name}: ${preview}`);
+  showChatBubble(name, preview);
 });
 
 function addSystemMessage(text) {
@@ -551,17 +605,6 @@ async function attemptDriveAutoShare(fileId, token) {
   }
 }
 
-document.getElementById('btn-load-drive-manual').addEventListener('click', () => {
-  const url = document.getElementById('drive-url-input').value.trim();
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (!match) return alert('Link Google Drive tidak valid. Gunakan format https://drive.google.com/file/d/FILE_ID/view');
-  socket.emit('set-video-source', {
-    roomId,
-    source: { type: 'drive', fileId: match[1], title: url }
-  });
-  toggleModal(false);
-});
-
 // ----- Website lain (auto-detect) -----
 document.getElementById('btn-detect-website').addEventListener('click', async () => {
   const url = document.getElementById('website-url-input').value.trim();
@@ -624,6 +667,7 @@ document.getElementById('btn-upload-file').addEventListener('click', async () =>
   const progressWrapper = document.getElementById('upload-progress-wrapper');
   const progressBar = document.getElementById('upload-progress-bar');
   const btnUpload = document.getElementById('btn-upload-file');
+  const btnUploadDefaultHTML = btnUpload.innerHTML; // simpan HTML asli (ikon+teks) biar bisa dikembalikan lagi
   progressWrapper.style.display = 'block';
 
   const formData = new FormData();
@@ -636,12 +680,12 @@ document.getElementById('btn-upload-file').addEventListener('click', async () =>
       const pct = (e.loaded / e.total) * 100;
       progressBar.style.width = `${pct}%`;
       // Setelah upload 100%, server mungkin masih memproses (deteksi subtitle mkv, dll)
-      if (pct >= 100) btnUpload.textContent = '⏳ Memproses video...';
+      if (pct >= 100) btnUpload.innerHTML = '⏳ Memproses video...';
     }
   };
   xhr.onload = async () => {
     if (xhr.status !== 200) {
-      btnUpload.textContent = '⬆️ Upload & Putar';
+      btnUpload.innerHTML = btnUploadDefaultHTML;
       alert('Upload gagal.');
       return;
     }
@@ -650,7 +694,7 @@ document.getElementById('btn-upload-file').addEventListener('click', async () =>
 
     // Kalau user juga upload file subtitle manual, upload & gabungkan ke daftar subtitle
     if (manualSubtitleFile) {
-      btnUpload.textContent = '⏳ Memproses subtitle...';
+      btnUpload.innerHTML = '⏳ Memproses subtitle...';
       try {
         const subForm = new FormData();
         subForm.append('subtitle', manualSubtitleFile);
@@ -666,7 +710,7 @@ document.getElementById('btn-upload-file').addEventListener('click', async () =>
       }
     }
 
-    btnUpload.textContent = '⬆️ Upload & Putar';
+    btnUpload.innerHTML = btnUploadDefaultHTML;
     socket.emit('set-video-source', {
       roomId,
       source: { type: 'file', url: data.url, title: data.title, subtitles }
@@ -857,7 +901,7 @@ setInterval(() => {
 }, 500);
 
 function updatePlayPauseIcon(isPlaying) {
-  el.btnPlayPause.textContent = isPlaying ? '⏸️' : '▶️';
+  el.btnPlayPause.innerHTML = isPlaying ? ICONS.pause : ICONS.play;
 }
 
 function initYoutubePlayer(videoId) {
@@ -983,6 +1027,19 @@ el.btnPlayPause.addEventListener('click', () => {
   if (!isMaster || !hasActiveVideo()) return;
   if (masterIsPlaying()) masterPause(); else masterPlay();
 });
+if (el.btnCenterPlay) {
+  el.btnCenterPlay.addEventListener('click', () => {
+    if (!isMaster || !hasActiveVideo()) return;
+    if (masterIsPlaying()) masterPause(); else masterPlay();
+  });
+}
+function updateCenterPlayVisibility() {
+  if (!el.btnCenterPlay) return;
+  const playing = hasActiveVideo() && masterIsPlaying();
+  el.btnCenterPlay.innerHTML = playing ? '' : ICONS.play;
+  el.btnCenterPlay.classList.toggle('show', !playing && hasActiveVideo());
+}
+setInterval(updateCenterPlayVisibility, 400);
 
 // ---------- Seek bar (drag hanya untuk Room Master) ----------
 el.seekBar.addEventListener('pointerdown', () => { if (isMaster) seekBarDragging = true; });
@@ -1007,7 +1064,7 @@ el.volumeBar.addEventListener('input', () => {
   const v = el.volumeBar.value / 100;
   el.html5Player.volume = v;
   if (ytPlayer && ytReady) { try { ytPlayer.setVolume(v * 100); if (v > 0) ytPlayer.unMute(); } catch (e) {} }
-  el.btnMute.textContent = v === 0 ? '🔇' : v < 0.5 ? '🔉' : '🔊';
+  el.btnMute.innerHTML = v === 0 ? ICONS.volumeMute : v < 0.5 ? ICONS.volumeLow : ICONS.volumeHigh;
   if (v > 0) lastVolume = v;
 });
 el.btnMute.addEventListener('click', () => {
@@ -1124,11 +1181,10 @@ setInterval(() => {
   socket.emit('playback-heartbeat', { roomId, time, isPlaying });
 }, 4000);
 
-// ---------- Fullscreen kustom (supaya chat tetap kelihatan lewat running text) ----------
+// ---------- Fullscreen kustom (supaya notifikasi chat tetap kelihatan lewat bubble pojok layar) ----------
 // Tombol fullscreen bawaan <video> sengaja dimatikan (controlsList="nofullscreen")
 // karena itu cuma fullscreen elemen <video>-nya saja (tidak bisa ditambahi overlay apa pun,
-// termasuk running text chat). Tombol ini fullscreen-kan #player-container sebagai gantinya,
-// jadi overlay marquee di dalamnya tetap ikut tampil.
+// termasuk bubble notifikasi chat). Tombol ini fullscreen-kan #player-container sebagai gantinya.
 el.btnFullscreen.addEventListener('click', () => {
   const container = el.playerContainer;
   if (isPlayerFullscreen()) {
@@ -1140,40 +1196,60 @@ el.btnFullscreen.addEventListener('click', () => {
   }
 });
 
+let isFullscreenNow = false;
 function isPlayerFullscreen() {
   const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
   return fsEl === el.playerContainer;
 }
 
 function handleFullscreenChange() {
-  const isFs = isPlayerFullscreen();
-  el.fullscreenMarquee.style.display = isFs ? 'block' : 'none';
-  el.btnFullscreen.textContent = isFs ? '⛶' : '⛶';
-  el.btnFullscreen.title = isFs ? 'Keluar Fullscreen' : 'Fullscreen (biar chat tetap kelihatan sebagai running text)';
+  isFullscreenNow = isPlayerFullscreen();
+  el.btnFullscreen.innerHTML = isFullscreenNow ? ICONS.fullscreenExit : ICONS.fullscreenEnter;
+  el.btnFullscreen.title = isFullscreenNow ? 'Keluar Fullscreen' : 'Fullscreen';
 }
 document.addEventListener('fullscreenchange', handleFullscreenChange);
 document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 document.addEventListener('mozfullscreenchange', handleFullscreenChange);
 
-// Antrian pesan berjalan (running text) — biar tidak tabrakan kalau chat rame,
-// pesan ditampilkan satu per satu bergantian.
-let marqueeQueue = [];
-let marqueeRunning = false;
-
-function pushMarquee(text) {
-  marqueeQueue.push(text);
-  if (!marqueeRunning) playNextMarquee();
+// ---------- Bubble notifikasi chat (muncul di pojok layar saat fullscreen, gantinya running text) ----------
+// Nada notifikasi dibuat langsung lewat Web Audio API (2 nada pendek naik), jadi gak perlu file audio eksternal.
+let notifAudioCtx = null;
+function playChatNotifSound() {
+  try {
+    if (!notifAudioCtx) notifAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (notifAudioCtx.state === 'suspended') notifAudioCtx.resume();
+    const now = notifAudioCtx.currentTime;
+    [[880, 0], [1174.66, 0.09]].forEach(([freq, delay]) => {
+      const osc = notifAudioCtx.createOscillator();
+      const gain = notifAudioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now + delay);
+      gain.gain.linearRampToValueAtTime(0.18, now + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.22);
+      osc.connect(gain).connect(notifAudioCtx.destination);
+      osc.start(now + delay);
+      osc.stop(now + delay + 0.24);
+    });
+  } catch (e) { /* browser gak support Web Audio API, abaikan diam-diam */ }
 }
-
-function playNextMarquee() {
-  if (marqueeQueue.length === 0) { marqueeRunning = false; return; }
-  marqueeRunning = true;
-  const text = marqueeQueue.shift();
-  el.marqueeTrack.textContent = text;
-  el.marqueeTrack.classList.remove('run');
-  void el.marqueeTrack.offsetWidth; // reflow paksa supaya animasi bisa diulang
-  el.marqueeTrack.classList.add('run');
-  el.marqueeTrack.addEventListener('animationend', playNextMarquee, { once: true });
+function showChatBubble(name, preview) {
+  if (!isFullscreenNow || !el.chatBubbleLayer) return;
+  playChatNotifSound();
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble-notif';
+  bubble.innerHTML = `${ICONS.chat}<div class="chat-bubble-text"><strong>${escapeHtml(name)}</strong><span>${escapeHtml(preview)}</span></div>`;
+  el.chatBubbleLayer.appendChild(bubble);
+  // Batasi maksimal 4 bubble sekaligus biar gak menumpuk penuh layar
+  while (el.chatBubbleLayer.children.length > 4) {
+    el.chatBubbleLayer.removeChild(el.chatBubbleLayer.firstChild);
+  }
+  requestAnimationFrame(() => bubble.classList.add('show'));
+  setTimeout(() => {
+    bubble.classList.remove('show');
+    bubble.classList.add('hide');
+    setTimeout(() => bubble.remove(), 350);
+  }, 4200);
 }
 
 // ---------- Reaksi emoji ----------
@@ -1225,7 +1301,7 @@ async function joinVoiceChat() {
     return;
   }
   voiceJoined = true;
-  el.btnJoinVoice.textContent = '🔴 Matikan Mikrofon';
+  el.btnJoinVoice.innerHTML = `${ICONS.micOff} <span>Matikan Mikrofon</span>`;
   el.btnJoinVoice.classList.add('mic-active');
   socket.emit('voice-join', { roomId });
 }
@@ -1237,7 +1313,7 @@ function leaveVoiceChat() {
   }
   Object.keys(peerConnections).forEach(closePeerConnection);
   voiceJoined = false;
-  el.btnJoinVoice.textContent = '🎤 Aktifkan Mikrofon';
+  el.btnJoinVoice.innerHTML = `${ICONS.mic} <span>Aktifkan Mikrofon</span>`;
   el.btnJoinVoice.classList.remove('mic-active');
   if (roomId) socket.emit('voice-leave', { roomId });
 }
